@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script
+            src="https://kit.fontawesome.com/97089a475a.js"
+            crossorigin="anonymous"
+        ></script>
+        <title>Before and after nonsense</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            html {
+                height: 100%;
+            }
+
+            body {
+                margin: 20px;
+                height: 100%;
+            }
+
+            /* TODO: work out why this isn't vertically centering */
+            main {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .app-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                margin-top: 25vh;
+            }
+
+            /* .main-content-container {
+                display: flex;
+            } */
+
+            button {
+                /* margin-top: 40%; */
+                /* margin-left: 40%; */
+                border: none;
+                background-color: lightblue;
+                padding: 5px 15px;
+                border-radius: 5px;
+                text-transform: capitalize;
+                font-weight: bold;
+                margin-bottom: 5px;
+                transition: 300ms background-color;
+            }
+
+            button:hover {
+                position: relative;
+                cursor: pointer;
+                background-color: rgb(147, 180, 190);
+            }
+
+            ul {
+                border: solid 1px lightblue;
+                border-radius: 5px;
+                width: fit-content;
+                padding: 20px 30px 0 30px;
+                text-align: center;
+                margin: auto;
+                min-width: 420px;
+            }
+
+            li {
+                margin-bottom: 30px;
+                font-weight: bold;
+                color: darkblue;
+                list-style: none;
+                position: relative;
+            }
+
+            i {
+                float: right;
+                margin-left: 20px;
+            }
+
+            i:hover {
+                cursor: pointer;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            .lighten {
+                opacity: 0.5;
+            }
+
+            .red {
+                color: orange;
+            }
+
+            .green {
+                color: green;
+            }
+
+            li::after {
+                content: 'OR';
+                display: block;
+                margin-top: 5px;
+                font-weight: lighter;
+                color: lightblue;
+                /* Position: absolute is required to remove the pseudoelement from the normal document flow */
+                position: absolute;
+                left: 145px;
+                pointer-events: none;
+            }
+
+            li:last-of-type::after {
+                content: none;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <!-- mount app -->
+            <div class="app-container">
+                <ul id="filter-panel-list"></ul>
+            </div>
+        </main>
+
+        <!-- libraries -->
+        <script src="jquery.js"></script>
+        <script src="underscore.js"></script>
+        <script src="backbone.js"></script>
+
+        <!-- templates -->
+        <script type="text/template" id="update-all-btn-template">
+            <button id="update-all-btn">Update All</button>
+        </script>
+
+        <script type="text/template" id="outdated-list-item-template">
+            <li data-updated-panel-id="{{updatedPanelId}}">
+                {{name}}
+                <i
+                    id="outdated-panel-warning-icon"
+                    class="fa-solid fa-triangle-exclamation red"
+                    title="This panel is outdated"
+                ></i>
+                <i
+                    id="outdated-panel-replace-icon"
+                    class="fa-solid fa-rotate hidden green"
+                    title="Replace outdated panel"
+                ></i>
+            </li>
+        </script>
+
+        <script type="text/template" id="current-list-item-template">
+            <li data-updated-panel-id="{{updatedPanelId}}">
+                {{name}}
+                <i
+                    id="outdated-panel-remove-icon"
+                    class="fa-solid fa-remove"
+                ></i>
+            </li>
+        </script>
+
+        <!-- model/collection/view logic -->
+        <script>
+            const setTemplateSettings = () => {
+                _.templateSettings = {
+                    interpolate: /\{\{(.+?)\}\}/g,
+                };
+            };
+
+            const FilterPanel = Backbone.Model.extend({});
+
+            const FilterPanels = Backbone.Collection.extend({
+                model: FilterPanel,
+            });
+
+            const audienceList = new FilterPanels();
+
+            audienceList.add([
+                new FilterPanel({
+                    id: 1,
+                    name: 'NBA Celtics 1',
+                    updatedPanelId: 20,
+                }),
+                new FilterPanel({
+                    id: 2,
+                    name: 'Where is my sandwhich?',
+                    updatedPanelId: 10,
+                }),
+                new FilterPanel({
+                    id: 20,
+                    name: 'NBA Celtics 2',
+                    updatedPanelId: 3,
+                }),
+                new FilterPanel({
+                    id: 3,
+                    name: 'NBA Celtics 3',
+                    updatedPanelId: null,
+                }),
+                new FilterPanel({
+                    id: 4,
+                    name: 'Much Ado About Excellence',
+                    updatedPanelId: null,
+                }),
+                new FilterPanel({
+                    id: 5,
+                    name: 'Dude its 23:42',
+                    updatedPanelId: 6,
+                }),
+                new FilterPanel({
+                    id: 6,
+                    name: 'But when youre on a roll, youre on a roll',
+                    updatedPanelId: null,
+                }),
+                new FilterPanel({
+                    id: 7,
+                    name: 'Survey of midnight coders: are they clinical?',
+                    updatedPanelId: 8,
+                }),
+                new FilterPanel({
+                    id: 8,
+                    name: 'Bringing it for Brandwatch',
+                    updatedPanelId: null,
+                }),
+                new FilterPanel({
+                    id: 9,
+                    name: 'The New World Order & Brandwatch One',
+                    updatedPanelId: null,
+                }),
+                new FilterPanel({
+                    id: 10,
+                    name: 'I cant believe someone ate my fucking sandwhich',
+                    updatedPanelId: null,
+                }),
+            ]);
+
+            let selectedAudienceList = new FilterPanels();
+            selectedAudienceList.comparator = 'name';
+
+            selectedAudienceList.add([
+                new FilterPanel({
+                    id: 1,
+                    name: 'NBA Celtics 1',
+                    updatedPanelId: 20,
+                }),
+                new FilterPanel({
+                    id: 2,
+                    name: 'Where is my sandwhich?',
+                    updatedPanelId: 10,
+                }),
+                new FilterPanel({
+                    id: 4,
+                    name: 'Much Ado About Excellence',
+                    updatedPanelId: null,
+                }),
+                new FilterPanel({
+                    id: 5,
+                    name: 'Dude its 23:42',
+                    updatedPanelId: 6,
+                }),
+                new FilterPanel({
+                    id: 7,
+                    name: 'Survey of midnight coders: are they clinical?',
+                    updatedPanelId: 8,
+                }),
+                new FilterPanel({
+                    id: 9,
+                    name: 'The New World Order & Brandwatch One',
+                    updatedPanelId: null,
+                }),
+            ]);
+
+            selectedAudienceList.sort();
+
+            const VIEW_SELECTORS = {
+                OUTDATED_FILTER_PANEL: 'li[data-updated-panel-id]',
+                UPDATE_PANEL_WARNING_ICON:
+                    'li[data-updated-panel-id] #outdated-panel-warning-icon',
+                UPDATE_PANEL_ICON:
+                    'li[data-updated-panel-id] #outdated-panel-replace-icon',
+                REMOVE_PANEL_ICON: '#outdated-panel-remove-icon',
+                UPDATE_ALL_PANELS_BTN: '#update-all-btn',
+            };
+
+            const dispatcher = _.clone(Backbone.Events);
+
+            const UpdateAllButtonView = Backbone.View.extend({
+                el: $('#update-all-btn'),
+
+                constructor: function () {
+                    this.template = _.template(
+                        $('#update-all-btn-template').html().toString()
+                    );
+                },
+
+                render: function () {
+                    setTemplateSettings();
+                    this.$el = this.template();
+                    return this;
+                },
+            });
+
+            const ListItemView = Backbone.View.extend({
+                model: FilterPanel,
+
+                el: $('li[data-updated-panel-id]'),
+
+                constructor: function (data) {
+                    this.template = _.template(
+                        $(
+                            data.model.get('updatedPanelId')
+                                ? '#outdated-list-item-template'
+                                : '#current-list-item-template'
+                        )
+                            .html()
+                            .toString()
+                    );
+                    this.model = data.model;
+                    return this;
+                },
+
+                render: function () {
+                    setTemplateSettings();
+                    this.$el = this.template(this.model.toJSON());
+                    return this;
+                },
+            });
+
+            const ListView = Backbone.View.extend({
+                el: $('#filter-panel-list'),
+
+                initialize: function () {
+                    selectedAudienceList.on('update', this.render, this);
+                    dispatcher.on('event:updateAllOutdatedPanels', () =>
+                        this.updateAllSocialPanels()
+                    );
+                },
+
+                togglePanelReplaceIcons: function ({ updatedPanelId, e }) {
+                    let el = e?.currentTarget;
+                    if (updatedPanelId) {
+                        el = $(`li[data-updated-panel-id=${updatedPanelId}]`);
+                    }
+
+                    if (
+                        e?.currentTarget?.childNodes[1]?.classList?.contains(
+                            'fa-remove'
+                        )
+                    ) {
+                        return;
+                    }
+
+                    el.children[0]?.classList.toggle('hidden');
+                    el.children[1]?.classList.toggle('hidden');
+                },
+
+                toggleOpacity: function (e) {
+                    e.currentTarget.classList.toggle('lighten');
+                },
+
+                replaceOutdatedPanel: function ({ updatedPanelId, e }) {
+                    const panelToReplace = selectedAudienceList.findWhere({
+                        updatedPanelId: Number.parseInt(updatedPanelId),
+                    });
+
+                    selectedAudienceList.remove(panelToReplace);
+
+                    const newPanel = audienceList.findWhere({
+                        id: Number.parseInt(updatedPanelId),
+                    });
+
+                    selectedAudienceList.add(newPanel);
+
+                    this.togglePanelReplaceIcons({ updatedPanelId, e });
+                },
+
+                getOutdatedPanelIdAttribute: function (e) {
+                    return (
+                        e.currentTarget.parentElement.attributes[0].value ||
+                        null
+                    );
+                },
+
+                updateAllSocialPanels: function () {
+                    const panelsToUpdate = $('#filter-panel-list')
+                        .children()
+                        .filter((i, child) =>
+                            Boolean($(child).data('updatedPanelId'))
+                        )
+                        .map((i, $el) =>
+                            $el.getAttribute('data-updated-panel-id')
+                        )
+                        .toArray();
+
+                    panelsToUpdate.forEach((id) => {
+                        this.replaceOutdatedPanel({ updatedPanelId: id });
+                    });
+                },
+
+                events: {
+                    [`mouseenter ${VIEW_SELECTORS.OUTDATED_FILTER_PANEL}`]:
+                        function onMouseEnterOutdatedPanel(e) {
+                            this.togglePanelReplaceIcons({ e });
+                        },
+
+                    [`mouseleave ${VIEW_SELECTORS.OUTDATED_FILTER_PANEL}`]:
+                        function onMouseLeaveOutdatedPanel(e) {
+                            this.togglePanelReplaceIcons({ e });
+                        },
+
+                    [`mouseenter ${VIEW_SELECTORS.REMOVE_PANEL_ICON}`]:
+                        function (e) {
+                            this.toggleOpacity(e);
+                        },
+
+                    [`mouseleave ${VIEW_SELECTORS.REMOVE_PANEL_ICON}`]:
+                        function (e) {
+                            this.toggleOpacity(e);
+                        },
+
+                    [`click ${VIEW_SELECTORS.UPDATE_PANEL_ICON}`]: function (
+                        e
+                    ) {
+                        const updatedPanelId =
+                            this.getOutdatedPanelIdAttribute(e);
+
+                        if (updatedPanelId) {
+                            this.replaceOutdatedPanel({ updatedPanelId, e });
+                        }
+                    },
+                },
+                render: function () {
+                    setTemplateSettings();
+
+                    $('#filter-panel-list').empty();
+
+                    selectedAudienceList.each((panel) => {
+                        const { name, updatedPanelId } = panel.attributes;
+                        this.$el.append(
+                            new ListItemView({
+                                model: panel,
+                            }).render().$el
+                        );
+                    }, this);
+
+                    return this;
+                },
+            });
+
+            const AppView = Backbone.View.extend({
+                el: $('.app-container'),
+
+                events: {
+                    //TODO: why can't I bind this event within the actual UpdateAllButtonView?
+                    'click #update-all-btn': function () {
+                        dispatcher.trigger('event:updateAllOutdatedPanels');
+                    },
+                },
+
+                render: function () {
+                    this.$el.append(new UpdateAllButtonView().render().$el);
+                    this.$el.append(new ListView().render().$el);
+                    return this;
+                },
+            });
+
+            const app = new AppView();
+            app.render();
+        </script>
+    </body>
+</html>
